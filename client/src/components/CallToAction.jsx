@@ -20,7 +20,7 @@ export default function CallToAction() {
             gradientDuoTone='purpleToPink'
             className='rounded-tl-xl rounded-bl-none rounded-br-xl w-full'
           >
-            100 JS Projects Website
+            Latest Tech Blogs Website
           </Button>
         </a>
       </div>

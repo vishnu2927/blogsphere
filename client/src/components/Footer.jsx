@@ -26,14 +26,14 @@ export default function FooterCom() {
                   target='_blank'
                   rel='noopener noreferrer'
                 >
-                  100 JS Projects
+                  Latest Tech Blogs
                 </Footer.Link>
                 <Footer.Link
                   href='/about'
                   target='_blank'
                   rel='noopener noreferrer'
                 >
-                  Sahand's Blog
+                  BlogSphere
                 </Footer.Link>
               </Footer.LinkGroup>
             </div>
