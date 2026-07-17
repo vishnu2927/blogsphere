@@ -124,7 +124,8 @@ npm run dev
 ## 👨‍💻 Developer
 
 **Vishnu Yadav**
-**Ujjwal Kumar** (https://github.com/ujjwal-py)
+
+**Ujjwal Kumar** 
 
 
 B.Tech CSE (AI & ML)
