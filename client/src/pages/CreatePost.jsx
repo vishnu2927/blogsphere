@@ -1,13 +1,7 @@
 import { Alert, Button, FileInput, Select, TextInput } from 'flowbite-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import {
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytesResumable,
-} from 'firebase/storage';
-import { app } from '../firebase';
+
 import { useState } from 'react';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -29,29 +23,45 @@ export default function CreatePost() {
         return;
       }
       setImageUploadError(null);
-      const storage = getStorage(app);
-      const fileName = new Date().getTime() + '-' + file.name;
-      const storageRef = ref(storage, fileName);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setImageUploadProgress(progress.toFixed(0));
-        },
-        (error) => {
-          setImageUploadError('Image upload failed');
-          setImageUploadProgress(null);
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            setImageUploadProgress(null);
-            setImageUploadError(null);
-            setFormData({ ...formData, image: downloadURL });
-          });
+      setImageUploadProgress(0);
+
+      const formDataUpload = new FormData();
+      formDataUpload.append('image', file);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${import.meta.env.VITE_BACKEND_URL}/api/upload`);
+      xhr.withCredentials = true;
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100;
+          setImageUploadProgress(percentComplete.toFixed(0));
         }
-      );
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          setImageUploadProgress(null);
+          setImageUploadError(null);
+          setFormData({ ...formData, image: response.url });
+        } else {
+          let errMsg = 'Image upload failed';
+          try {
+            const errRes = JSON.parse(xhr.responseText);
+            errMsg = errRes.message || errMsg;
+          } catch (e) {}
+          setImageUploadError(errMsg);
+          setImageUploadProgress(null);
+        }
+      };
+
+      xhr.onerror = () => {
+        setImageUploadError('Image upload failed');
+        setImageUploadProgress(null);
+      };
+
+      xhr.send(formDataUpload);
     } catch (error) {
       setImageUploadError('Image upload failed');
       setImageUploadProgress(null);
@@ -107,6 +117,9 @@ export default function CreatePost() {
             }
           >
             <option value='uncategorized'>Select a category</option>
+            <option value='tech'>Tech</option>
+            <option value='health'>Health</option>
+            <option value='sports'>Sports</option>
             <option value='javascript'>JavaScript</option>
             <option value='reactjs'>React.js</option>
             <option value='nextjs'>Next.js</option>

@@ -2,10 +2,13 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
 import userRoutes from './src/routes/user.route.js';
 import authRoutes from './src/routes/auth.route.js';
 import postRoutes from './src/routes/post.route.js';
 import commentRoutes from './src/routes/comment.route.js';
+import uploadRoutes from './src/routes/upload.route.js';
 import cookieParser from 'cookie-parser';
 
 // Configure environment variables
@@ -54,6 +57,13 @@ const connectDB = async () => {
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
+
+// Ensure uploads folder exists and serve it statically
+const uploadsDir = path.resolve('uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
 
 // Database middleware (only for endpoints that need DB)
 const connectMiddleware = async (req, res, next) => {
@@ -106,6 +116,7 @@ app.use('/api/user', connectMiddleware, userRoutes);
 app.use('/api/auth', connectMiddleware, authRoutes);
 app.use('/api/post', connectMiddleware, postRoutes);
 app.use('/api/comment', connectMiddleware, commentRoutes);
+app.use('/api/upload', connectMiddleware, uploadRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {
